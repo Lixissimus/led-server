@@ -1,0 +1,11 @@
+{
+  "name": "led-server",
+  "version": "1.0.0",
+  "description": "http server to show colors of rgb led strip",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "author": "Felix Wolff",
+  "license": "ISC"
+}
