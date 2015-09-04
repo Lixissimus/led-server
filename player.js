@@ -5,6 +5,8 @@ var fs = require("fs"),
 var isPi = os.hostname() === "raspberrypi";
 var conf = JSON.parse(fs.readFileSync("./config.json"));
 
+var stopProgram = false;
+
 function showColor(color) {
 	if (isPi) {
 		// we are on the raspberry
@@ -47,6 +49,26 @@ function fade(from, to, dur) {
 	step();
 }
 
+function play(program) {
+	var code = fs.readFileSync(program).toString();
+
+	function set(r, g, b) {
+		showColor({
+			red: r,
+			green: g,
+			blue: b
+		});
+	}
+
+	function step() {
+		eval(code);
+		if (!stopProgram) {
+			setTimeout(step, 100);
+		}
+	}
+	step();
+}
+
 // var from = {
 // 	red: 0,
 // 	blue: 0,
@@ -60,6 +82,8 @@ function fade(from, to, dur) {
 // 	alpha: 255
 // }
 // fade(from, to, 5000);
+
+// play("programs/fire.js");
 
 exports.fade = fade;
 exports.show = showColor;

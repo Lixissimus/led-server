@@ -53,6 +53,7 @@ postHandlers["/show"] = function(req, res) {
 
 		currentColor = color;
 
+		res.setHeader('Access-Control-Allow-Origin','*');
 		res.writeHead(200, "OK", {'Content-Type': 'text/html'});
 		res.end();
 	});
