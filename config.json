@@ -1,8 +1,8 @@
 {
 	"port": 8888,
 	"pins": {
-		"red": 10,
-		"green": 12,
-		"blue": 13
+		"red": 23,
+		"green": 18,
+		"blue": 24
 	}
 }
