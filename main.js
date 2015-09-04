@@ -2,8 +2,16 @@ var http = require("http"),
 	url = require("url"),
 	qs = require("querystring"),
 	fs = require("fs"),
-	sys = require("sys"),
-	exec = require("child_process").exec;
+	player = require("./player.js");
+
+var conf = JSON.parse(fs.readFileSync("./config.json"));
+
+var currentColor = {
+	red: 0,
+	green: 0,
+	blue: 0,
+	alpha: 255
+}
 
 var handlers = {
 	"GET": {},
@@ -24,18 +32,26 @@ postHandlers["/show"] = function(req, res) {
 	var data = '';
 	req.on('data', function(chunk) {
 		data += chunk;
-
-		// Too much POST data, kill the connection
-        if (data.length > 1e6) {
-            req.connection.destroy();
-        }
 	});
 
 	req.on('end', function() {
 		var params = qs.parse(data);
 
+		var mode = params["mode"];
 		var color = createColorFromParams(params);
-		showColor(color);
+		switch (mode) {
+			case "fade": {
+				var dur = params["dur"] || 500;
+				player.fade(currentColor, color, dur);
+				break;
+			}
+			case "static":
+			default: {
+				player.show(color);
+			}
+		}
+
+		currentColor = color;
 
 		res.writeHead(200, "OK", {'Content-Type': 'text/html'});
 		res.end();
@@ -64,18 +80,8 @@ function createColorFromParams(params) {
 	return color;
 }
 
-function showColor(color) {
-	// console.log("showing:");
-	// console.log(color.red);
-	// console.log(color.green);
-	// console.log(color.blue);
-	// console.log(color.alpha);
-
-	exec("echo " + conf.pins.red + "=" + (color.red / 255) + " > /dev/pi-blaster");
-	exec("echo " + conf.pins.green + "=" + (color.green / 255) + " > /dev/pi-blaster");
-	exec("echo " + conf.pins.blue + "=" + (color.blue / 255) + " > /dev/pi-blaster");
-}
-
-var conf = JSON.parse(fs.readFileSync("./config.json"));
-
 http.createServer(onRequest).listen(conf.port);
+console.log("Server is running...");
+
+// start with the default color
+player.show(currentColor);

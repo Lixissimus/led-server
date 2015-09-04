@@ -4,5 +4,6 @@
 		"red": 23,
 		"green": 18,
 		"blue": 24
-	}
+	},
+	"msFadeStep": 50
 }
