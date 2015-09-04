@@ -71,9 +71,9 @@ function showColor(color) {
 	// console.log(color.blue);
 	// console.log(color.alpha);
 
-	exec("echo " + conf.pins.red + "=" + (color.red / 255) + " > dev/pi-blaster");
-	exec("echo " + conf.pins.green + "=" + (color.green / 255) + " > dev/pi-blaster");
-	exec("echo " + conf.pins.blue + "=" + (color.blue / 255) + " > dev/pi-blaster");
+	exec("echo " + conf.pins.red + "=" + (color.red / 255) + " > /dev/pi-blaster");
+	exec("echo " + conf.pins.green + "=" + (color.green / 255) + " > /dev/pi-blaster");
+	exec("echo " + conf.pins.blue + "=" + (color.blue / 255) + " > /dev/pi-blaster");
 }
 
 var conf = JSON.parse(fs.readFileSync("./config.json"));
