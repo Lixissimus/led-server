@@ -50,8 +50,11 @@ function fade(from, to, dur) {
 }
 
 function play(program) {
+	stopProgram = false;
+	// read the program code
 	var code = fs.readFileSync(program).toString();
 
+	// define some util functions that can be used in the programs
 	function set(r, g, b) {
 		showColor({
 			red: r,
@@ -60,30 +63,44 @@ function play(program) {
 		});
 	}
 
-	function step() {
-		eval(code);
-		if (!stopProgram) {
-			setTimeout(step, 100);
+	eval("var prog = " + code);
+
+	// code to run the program
+	var line = 0;
+	function run() {
+		if (line < prog.length) {
+			var waittime = 0;
+			while (typeof prog[line] === "number") {
+				waittime += prog[line];
+				line++;
+			}
+
+			setTimeout(function() {
+				if (stopProgram) {
+					return;
+				}
+				if (typeof prog[line] === "function") {
+					prog[line]();
+				}
+				line++;
+				run();
+			}, waittime);
+		} else {
+			line = 0;
+			if (!stopProgram) {
+				run();
+			}
 		}
 	}
-	step();
+
+	run();
 }
 
-// var from = {
-// 	red: 0,
-// 	blue: 0,
-// 	green: 0,
-// 	alpha: 255
-// }
-// var to = {
-// 	red: 255,
-// 	blue: 255,
-// 	green: 255,
-// 	alpha: 255
-// }
-// fade(from, to, 5000);
-
-// play("programs/fire.js");
+function stop() {
+	stopProgram = true;
+}
 
 exports.fade = fade;
 exports.show = showColor;
+exports.play = play;
+exports.stop = stop;

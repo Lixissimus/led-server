@@ -45,6 +45,15 @@ postHandlers["/show"] = function(req, res) {
 				player.fade(currentColor, color, dur);
 				break;
 			}
+			case "program": {
+				var name = params["name"];
+				player.play("programs/" + name);
+				break;
+			}
+			case "stop": {
+				player.stop();
+				break;
+			}
 			case "static":
 			default: {
 				player.show(color);

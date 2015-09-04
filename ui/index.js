@@ -1,19 +1,38 @@
 var sendButton = document.getElementById("send"),
+	fireButton = document.getElementById("fire"),
+	stopButton = document.getElementById("stop"),
 	colorPicker = document.getElementById("color"),
 	modeSelect = document.getElementById("mode"),
 	durationField = document.getElementById("duration");
 
+var url = "http://192.168.178.91:8888/";
+
 sendButton.addEventListener("click", sendRequest);
+fireButton.addEventListener("click", startFireProgram);
+stopButton.addEventListener("click", stopFireProgram);
 
 
 function sendRequest() {
 	var color = hexToRgb(colorPicker.value);
-	$.post("http://192.168.178.91:8888/show", {
+	$.post(url + "show", {
 		r: color.r,
 		g: color.g,
 		b: color.b,
 		mode: modeSelect.value,
 		dur: durationField.value
+	});
+}
+
+function startFireProgram() {
+	$.post(url + "show", {
+		mode: "program",
+		name: "fire.js"
+	});
+}
+
+function stopFireProgram() {
+	$.post(url + "show", {
+		mode: "stop"
 	});
 }
 
