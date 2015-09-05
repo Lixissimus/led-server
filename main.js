@@ -6,13 +6,6 @@ var http = require("http"),
 
 var conf = JSON.parse(fs.readFileSync("./config.json"));
 
-var currentColor = {
-	red: 0,
-	green: 0,
-	blue: 0,
-	alpha: 255
-}
-
 var handlers = {
 	"GET": {},
 	"POST": {}
@@ -42,7 +35,7 @@ postHandlers["/show"] = function(req, res) {
 		switch (mode) {
 			case "fade": {
 				var dur = params["dur"] || 500;
-				player.fade(currentColor, color, dur);
+				player.fade(color, dur);
 				break;
 			}
 			case "program": {
@@ -60,10 +53,9 @@ postHandlers["/show"] = function(req, res) {
 			}
 		}
 
-		currentColor = color;
-
-		res.setHeader('Access-Control-Allow-Origin','*');
-		res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+		// allow cross origin requests
+		res.setHeader("Access-Control-Allow-Origin", "*");
+		res.writeHead(200, "OK", {"Content-Type": "text/html"});
 		res.end();
 	});
 }
@@ -93,5 +85,10 @@ function createColorFromParams(params) {
 http.createServer(onRequest).listen(conf.port);
 console.log("Server is running...");
 
-// start with the default color
-player.show(currentColor);
+// to leds of at the beginning
+player.show({
+	red: 0,
+	green: 0,
+	blue: 0,
+	alpha: 255
+});
