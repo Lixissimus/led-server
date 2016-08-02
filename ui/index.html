@@ -2,18 +2,17 @@
 <html>
 <head>
 	<title>LED UI</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="styles/style.css">
+	<link rel="stylesheet" href="font-awesome-4.6.3/css/font-awesome.min.css">
+
+	<script src="lib/jscolor.js"></script>
 </head>
 <body>
-<input id="color" type="color" value="#43bc46">
-<select id="mode">
-	<option value="fade">Fade</option>
-	<option value="static">Static</option>
-</select>
-<input id="duration" type="number" value="200" step="50" min="0">
-<button id="send">Send</button>
-<button id="fire">Fire!</button>
-<button id="stop">Stop!</button>
+
+<div>
+	<!-- <input class="jscolor {onFineChange:'onColorChanged(this, false)'}" onchange="onColorChanged(this.jscolor, true)" value="ab2567"> -->
+	<button class="jscolor {valueElement:null, value:'ab2567', onFineChange:'onColorChanged(this, false)'}" onchange="onColorChanged(this.jscolor, true)"></button>
+</div>
 
 <script src="index.js"></script>
 </body>

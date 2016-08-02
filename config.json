@@ -5,5 +5,8 @@
 		"green": 18,
 		"blue": 24
 	},
-	"msFadeStep": 50
+	"msFadeStep": 50,
+  "staticServer": {
+    "port": 8081
+  }
 }

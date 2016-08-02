@@ -1,54 +1,74 @@
-var http = require("http"),
-	url = require("url"),
-	qs = require("querystring"),
-	fs = require("fs"),
-	player = require("./player.js");
+'use strict'
 
-var conf = JSON.parse(fs.readFileSync("./config.json"));
+let http = require("http"),
+		url = require("url"),
+		qs = require("querystring"),
+		fs = require("fs"),
+		cp = require("child_process"),
+		player = require("./player.js");
 
-var handlers = {
+require("log-timestamp");
+
+let conf = JSON.parse(fs.readFileSync("./config.json"));
+
+let handlers = {
 	"GET": {},
 	"POST": {}
 }
 
-getHandlers = handlers["GET"];
-postHandlers = handlers["POST"];
+let getHandlers = handlers["GET"];
+let postHandlers = handlers["POST"];
 
 getHandlers["/"] = function(req, res) {
 	res.writeHead(200, {"Content-Type": "text/json"});
 	res.write(JSON.stringify(conf));
 	res.end();
 }
+
 getHandlers["/config"] = handlers["/"];
 
-postHandlers["/show"] = function(req, res) {
-	var data = '';
-	req.on('data', function(chunk) {
+getHandlers["/programs"] = (req, res) => {
+	let programs = fs.readdirSync("./programs").filter(file => {
+		return file.slice(-3) === ".js";
+	});
+
+	let body = {
+		programs: programs
+	}
+	res.setHeader("Access-Control-Allow-Origin", "*");
+	res.writeHead(200, "OK", {"Content-Type": "text/json"});
+	res.write(JSON.stringify(body));
+	res.end();
+}
+
+postHandlers["/show"] = (req, res) => {
+	let data = '';
+	req.on('data', chunk => {
 		data += chunk;
 	});
 
-	req.on('end', function() {
-		var params = qs.parse(data);
+	req.on('end', () => {
+		let params = JSON.parse(data);
+		let mode = params["mode"];
+		let color = createColorFromParams(params);
 
-		var mode = params["mode"];
-		var color = createColorFromParams(params);
 		switch (mode) {
 			case "fade": {
-				var dur = params["dur"] || 500;
+				player.stop();
+				let dur = params["dur"] || 500;
 				player.fade(color, dur);
 				break;
 			}
 			case "program": {
-				var name = params["name"];
-				player.play("programs/" + name);
-				break;
-			}
-			case "stop": {
 				player.stop();
+				let name = params["name"];
+				player.play(`programs/${name}`);
 				break;
 			}
+			case "stop":
 			case "static":
 			default: {
+				player.stop();
 				player.show(color);
 			}
 		}
@@ -61,10 +81,18 @@ postHandlers["/show"] = function(req, res) {
 }
 
 function onRequest(req, res) {
-	var pathname = url.parse(req.url).pathname;
-	var method = req.method;
+	let pathname = url.parse(req.url).pathname;
+	let method = req.method;
+	console.log("got req", req.method);
 	if (handlers[method] && typeof handlers[method][pathname] === "function") {
 		handlers[method][pathname](req, res);
+	} else if (method === "OPTIONS") {
+		// pre-flight request
+		res.setHeader("Access-Control-Allow-Origin", "*");
+		res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+		res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+		res.writeHead(200);
+		res.end();
 	} else {
 		res.writeHead(404, {"Content-Type": "text/plain"});
 		res.write("404 Not found");
@@ -73,7 +101,7 @@ function onRequest(req, res) {
 }
 
 function createColorFromParams(params) {
-	var color = {};
+	let color = {};
 	color.red = parseInt(params["r"] || 0);
 	color.green = parseInt(params["g"] || 0);
 	color.blue = parseInt(params["b"] || 0);
@@ -83,12 +111,20 @@ function createColorFromParams(params) {
 }
 
 http.createServer(onRequest).listen(conf.port);
-console.log("Server is running...");
+console.log(`LED-Server is running on port ${conf.port}`);
 
-// to leds of at the beginning
+if (conf.staticServer) {
+	// also start a static server for the ui
+	console.log(`Starting static http-server on port ${conf.staticServer.port}`);
+	cp.exec(`python -m SimpleHTTPServer ${conf.staticServer.port}`, {
+		cwd: "ui"
+	});
+}
+
+// turn leds of at the beginning
 player.show({
 	red: 0,
 	green: 0,
 	blue: 0,
-	alpha: 255
+	alpha: 0
 });

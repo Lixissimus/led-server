@@ -9,6 +9,7 @@
   "author": "Felix Wolff",
   "license": "ISC",
   "dependencies": {
+    "log-timestamp": "^0.1.2",
     "pi-blaster.js": "^0.1.1"
   }
 }
